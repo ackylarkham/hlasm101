@@ -1,15 +1,15 @@
-/ASMCLG JOB MSGCLASS=Q,CLASS=ASM
+//ASMLKGOA JOB MSGCLASS=Q,CLASS=A
 //*********************************************************************
 //*アセンブル、連係編集、実行ジョブ
 //*********************************************************************
 //*アセンブル
 //ASM      EXEC PGM=ASMA90
 //SYSLIB   DD  DSN=SYS1.MACLIB,DISP=SHR
-//SYSUT1   DD  DSN=&&SYSUT1,SPACE=(4096,(120,120),,,ROUND),
+//SYSUT1   DD  DSN=&&SYSUT1,SPACE=(CYL,(1,1)),
 //             UNIT=SYSALLDA,DCB=BUFNO=1
 //SYSPRINT DD  SYSOUT=*
-//SYSLIN   DD  DSN=&&OBJ,SPACE=(3040,(40,40),,,ROUND),
-//             UNIT=SYSALLDA,DISP=(MOD,PASS),
+//SYSLIN   DD  DSN=&&OBJ,SPACE=(CYL,(1,1)),
+//             UNIT=SYSALLDA,DISP=(,PASS,DELETE),
 //             DCB=(BLKSIZE=3040,LRECL=80,RECFM=FB,BUFNO=1)
 //*プログラムをここに直打ち
 //SYSIN    DD *
@@ -30,21 +30,25 @@ BR14     CSECT
          END
 /*
 //*アセンブルが正常終了したら連係編集を行う
-// IF RC= 0 THEN
+// IF RC = 0 THEN
 //LKED     EXEC PGM=IEWBLINK,REGION=0M
-//SYSPRINT DD  SYSOUT=*
-//SYSLIN   DD  DSNAME=&&OBJ,DISP=(OLD,DELETE)
-//         DD  DDNAME=SYSIN
-//SYSLMOD  DD DSN=&SYSUID..LOAD(BR14),DISP=SHR
-//CEEDUMP  DD DUMMY
-//SYSUDUMP DD DUMMY
+//SYSPRINT DD   SYSOUT=*
+//SYSLIN   DD   DSNAME=&&OBJ,DISP=(OLD,DELETE,DELETE)
+//         DD   DDNAME=SYSIN
+//SYSLMOD  DD   DSN=&&LOAD(BR14),DISP=(,PASS,DELETE),
+//         SPACE=(CYL,(1,1,1)),
+//         UNIT=SYSALLDA
+//CEEDUMP  DD   DUMMY
+//SYSUDUMP DD   DUMMY
+//SYSIN    DD   *
+/*
 // ELSE
 // ENDIF
 //*連係編集が正常終了したら実行する
 // IF RC = 0 THEN
-//RUN      EXEC PGM=BR14
-//STEPLIB  DD DSN=&SYSUID..LOAD,DISP=SHR
-//SYSOUT   DD SYSOUT=*,OUTLIM=15000
+//GO      EXEC PGM=BR14
+//STEPLIB  DD DSN=&&LOAD,DISP=(OLD,DELETE,DELETE)
+//SYSOUT   DD SYSOUT=*
 //CEEDUMP  DD DUMMY
 //SYSUDUMP DD DUMMY
 // ELSE
